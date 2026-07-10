@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring Pendampingan Tipidkor — Polres Karanganyar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#152238;
+  --navy-2:#1f3358;
+  --maroon:#7c1d24;
+  --maroon-2:#9a2a31;
+  --gold:#b8912f;
+  --paper:#f6f3ec;
+  --paper-2:#eee9dc;
+  --ink:#22262c;
+  --ink-soft:#5b6270;
+  --line:#d8d0bd;
+  --white:#fffdf9;
+  --ok:#3d6b4f;
+  --warn:#b8912f;
+  --danger:#7c1d24;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:'Public Sans',sans-serif;background:var(--paper);color:var(--ink);}
+h1,h2,h3,.serif{font-family:'Source Serif 4',serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+
+/* ===== HEADER (kop surat style) ===== */
+header.kop{
+  background:var(--navy);
+  color:var(--white);
+  padding:22px 32px 18px;
+  border-bottom:6px solid var(--gold);
+  position:relative;
+}
+.kop-inner{
+  max-width:1280px;margin:0 auto;
+  display:flex;align-items:center;gap:18px;
+}
+.kop-badge{
+  width:56px;height:56px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, var(--gold), #8a6a1f 70%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Source Serif 4',serif;font-weight:700;color:var(--navy);
+  font-size:22px;flex-shrink:0;
+  border:2px solid rgba(255,255,255,.4);
+}
+.kop-text .eyebrow{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c9b98a;
+  margin:0 0 3px;font-weight:600;
+}
+.kop-text h1{
+  margin:0;font-size:24px;font-weight:600;line-height:1.25;
+}
+.kop-text .sub{
+  margin:4px 0 0;font-size:13px;color:#b9c2d4;
+}
+.kop-line{
+  max-width:1280px;margin:14px auto 0;border-top:1px solid rgba(255,255,255,.18);
+}
+
+/* ===== NAV ===== */
+nav.tabs{
+  background:var(--navy-2);
+  border-bottom:1px solid rgba(0,0,0,.15);
+}
+.tabs-inner{
+  max-width:1280px;margin:0 auto;display:flex;gap:2px;padding:0 24px;
+}
+.tab-btn{
+  background:transparent;border:none;color:#c3cbdb;
+  padding:13px 20px;font-family:'Public Sans',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;letter-spacing:.01em;border-bottom:3px solid transparent;
+  transition:all .15s;
+}
+.tab-btn:hover{color:#fff;background:rgba(255,255,255,.05);}
+.tab-btn.active{color:#fff;border-bottom-color:var(--gold);background:rgba(255,255,255,.06);}
+
+main{max-width:1280px;margin:0 auto;padding:28px 24px 60px;}
+.view{display:none;}
+.view.active{display:block;}
+
+/* ===== DASHBOARD ===== */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px;}
+.stat-card{
+  background:var(--white);border:1px solid var(--line);border-radius:4px;
+  padding:18px 20px;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gold);
+}
+.stat-card .label{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:600;margin:0 0 8px;}
+.stat-card .value{font-family:'Source Serif 4',serif;font-size:28px;font-weight:600;color:var(--navy);margin:0;}
+.stat-card .value small{font-size:14px;font-weight:500;color:var(--ink-soft);}
+
+.chart-row{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;margin-bottom:24px;}
+.panel{
+  background:var(--white);border:1px solid var(--line);border-radius:4px;padding:20px 22px;
+}
+.panel h2{font-size:16px;margin:0 0 4px;color:var(--navy);font-weight:600;}
+.panel .desc{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
+.chart-wrap{position:relative;height:260px;}
+
+.legend-list{list-style:none;margin:14px 0 0;padding:0;font-size:12.5px;}
+.legend-list li{display:flex;align-items:center;gap:8px;padding:4px 0;color:var(--ink);}
+.legend-list .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.legend-list .val{margin-left:auto;font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);}
+
+/* ===== PAGU COMPOSITION BAR ===== */
+.pagu-bar{
+  display:flex;height:34px;border-radius:3px;overflow:hidden;border:1px solid var(--line);
+}
+.pagu-bar .seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;}
+.pagu-bar-legend{display:flex;gap:22px;margin-top:12px;flex-wrap:wrap;font-size:12.5px;}
+.pagu-bar-legend .item{display:flex;align-items:center;gap:7px;}
+.pagu-bar-legend .dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.pagu-bar-legend .amt{font-family:'IBM Plex Mono',monospace;color:var(--ink-soft);}
+
+/* ===== DONUT CHART (status progres) ===== */
+.donut-wrap{display:flex;align-items:center;gap:36px;flex-wrap:wrap;padding:6px 0 4px;}
+.donut{
+  width:210px;height:210px;border-radius:50%;position:relative;flex-shrink:0;
+}
+.donut-center{
+  position:absolute;inset:40px;background:var(--white);border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+.donut-center .num{font-family:'Source Serif 4',serif;font-size:26px;font-weight:600;color:var(--navy);line-height:1;}
+.donut-center .lbl{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
+.legend-list.status-legend{flex:1;min-width:230px;}
+.legend-list.status-legend li{font-size:13.5px;padding:6px 0;}
+.legend-list.status-legend .dot{width:10px;height:10px;}
+.legend-list.status-legend .pct{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--navy);margin-left:auto;}
+.legend-list.status-legend .cnt{font-size:11.5px;color:var(--ink-soft);margin-left:8px;width:60px;text-align:right;}
+
+/* ===== PER-BIDANG BREAKDOWN CARDS ===== */
+.bidang-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px;}
+.bidang-card{
+  background:var(--white);border:1px solid var(--line);border-radius:4px;padding:18px 20px;
+}
+.bidang-card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px;}
+.bidang-card-head h3{margin:0;font-size:15.5px;color:var(--navy);font-weight:600;}
+.bidang-card-head .count{font-family:'Source Serif 4',serif;font-size:19px;font-weight:600;color:var(--navy);}
+.bidang-card .subline{font-size:11.5px;color:var(--ink-soft);margin:0 0 14px;}
+.status-row{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:12.5px;}
+.status-row .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-row .name{flex:1;color:var(--ink);}
+.status-row .n{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--navy);width:20px;text-align:right;}
+.status-row .track{flex:1.4;height:6px;background:var(--paper-2);border-radius:4px;overflow:hidden;}
+.status-row .fill{height:100%;border-radius:4px;}
+
+@media(max-width:980px){
+  .bidang-cards{grid-template-columns:1fr;}
+}
+
+/* ===== BIDANG VIEW ===== */
+.bidang-head{
+  display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px;gap:16px;flex-wrap:wrap;
+}
+.bidang-head h2{font-size:21px;margin:0 0 4px;color:var(--navy);}
+.bidang-head .desc{font-size:13px;color:var(--ink-soft);margin:0;}
+
+.toolbar{
+  display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;
+}
+.toolbar input[type=text]{
+  flex:1;min-width:220px;padding:9px 12px;border:1px solid var(--line);border-radius:3px;
+  font-family:'Public Sans',sans-serif;font-size:13.5px;background:var(--white);
+}
+.toolbar select{
+  padding:9px 10px;border:1px solid var(--line);border-radius:3px;background:var(--white);font-size:13px;
+}
+.pill-count{
+  font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;
+  padding:8px 4px;
+}
+
+table.data{
+  width:100%;border-collapse:collapse;background:var(--white);
+  border:1px solid var(--line);font-size:12.8px;
+}
+table.data thead th{
+  background:var(--navy);color:#e8e4d8;text-align:left;padding:10px 12px;
+  font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+  position:sticky;top:0;
+}
+table.data tbody td{
+  padding:10px 12px;border-bottom:1px solid var(--paper-2);vertical-align:top;
+}
+table.data tbody tr:hover{background:#fbf9f3;cursor:pointer;}
+table.data tbody tr:nth-child(even){background:#fcfaf5;}
+table.data tbody tr:nth-child(even):hover{background:#faf6ec;}
+.col-no{width:36px;color:var(--ink-soft);}
+.col-nama{min-width:230px;font-weight:500;}
+.col-num{text-align:right;font-family:'IBM Plex Mono',monospace;white-space:nowrap;}
+.empty-note{color:#b3a99a;font-style:italic;}
+
+.badge{
+  display:inline-block;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.03em;
+}
+.badge-perencanaan{background:#eee;color:#68707c;}
+.badge-tender{background:#fbe9c9;color:#8a6a1f;}
+.badge-kontrak{background:#dde8f5;color:#26497a;}
+.badge-pelaksanaan{background:#fde3c9;color:#9a4d0f;}
+.badge-selesai{background:#dcefdf;color:#2c6b40;}
+.badge-pl{background:#e6e0f0;color:#5b3d8a;}
+.badge-tender-metode{background:#dde8f5;color:#26497a;}
+
+/* ===== MODAL ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(21,34,56,.55);display:none;
+  align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.overlay.active{display:flex;}
+.modal{
+  background:var(--white);border-radius:5px;max-width:560px;width:100%;
+  max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+.modal-head{
+  background:var(--navy);color:#fff;padding:16px 22px;border-radius:5px 5px 0 0;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-head h3{margin:0;font-size:15px;font-weight:600;max-width:440px;}
+.modal-head button{background:none;border:none;color:#c3cbdb;font-size:20px;cursor:pointer;line-height:1;}
+.modal-body{padding:20px 22px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:600;margin-bottom:5px;}
+.field .static{font-size:13.5px;color:var(--ink);padding:7px 0;}
+.field input,.field select{
+  width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:3px;font-size:13.5px;font-family:inherit;
+}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-foot{
+  padding:14px 22px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--paper-2);
+}
+.btn{
+  padding:9px 18px;border-radius:3px;font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;
+  font-family:'Public Sans',sans-serif;
+}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{background:var(--navy-2);}
+.btn-ghost{background:transparent;color:var(--ink-soft);border-color:var(--line);}
+.btn-ghost:hover{background:var(--paper-2);}
+.pin-note{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+footer{
+  text-align:center;padding:20px;font-size:11.5px;color:#a99;color:var(--ink-soft);
+  border-top:1px solid var(--line);
+}
+
+@media(max-width:860px){
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .chart-row{grid-template-columns:1fr;}
+  .kop-text h1{font-size:19px;}
+}
+</style>
+</head>
+<body>
+
+<header class="kop">
+  <div class="kop-inner">
+    <div class="kop-badge">TP</div>
+    <div class="kop-text">
+      <p class="eyebrow">Dinas PUPR &amp; Kepolisian Resort Karanganyar · Unit Tipidkor</p>
+      <h1>Monitoring Pendampingan Tipidkor Polres Karanganyar</h1>
+      <p class="sub">Data terbuka kegiatan fisik kontraktual — Bidang Sumber Daya Air, Cipta Karya, dan Bina Marga · Tahun Anggaran 2026</p>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-inner">
+    <button class="tab-btn active" data-view="dashboard">Dashboard</button>
+    <button class="tab-btn" data-view="sda">Sumber Daya Air</button>
+    <button class="tab-btn" data-view="ck">Cipta Karya</button>
+    <button class="tab-btn" data-view="bm">Bina Marga</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section id="view-dashboard" class="view active">
+    <div class="panel" style="margin-bottom:18px;">
+      <h2>Distribusi Status Progres Seluruh Paket</h2>
+      <p class="desc">Persentase dari total 83 paket kegiatan fisik kontraktual TA 2026</p>
+      <div class="donut-wrap">
+        <div class="donut" id="statusDonut"><div class="donut-center" id="donutCenter"></div></div>
+        <ul class="legend-list status-legend" id="statusLegend"></ul>
+      </div>
+    </div>
+
+    <div class="bidang-cards" id="bidangCards"></div>
+  </section>
+
+  <!-- SDA -->
+  <section id="view-sda" class="view">
+    <div class="bidang-head">
+      <div>
+        <h2>Bidang Sumber Daya Air</h2>
+        <p class="desc">Rehabilitasi jaringan irigasi &amp; embung — DPUPR Kabupaten Karanganyar TA 2026</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="searchSda" placeholder="Cari nama paket, lokasi, atau penyedia jasa...">
+      <select id="filterSda"><option value="">Semua Status</option></select>
+      <span class="pill-count" id="countSda"></span>
+    </div>
+    <div style="overflow-x:auto;"><table class="data" id="tableSda"></table></div>
+  </section>
+
+  <!-- CK -->
+  <section id="view-ck" class="view">
+    <div class="bidang-head">
+      <div>
+        <h2>Bidang Cipta Karya</h2>
+        <p class="desc">SPAM, sanitasi, gedung, drainase &amp; rehabilitasi jalan lingkungan — DPUPR Kabupaten Karanganyar TA 2026</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="searchCk" placeholder="Cari nama paket, lokasi, atau penyedia jasa...">
+      <select id="filterCk"><option value="">Semua Status</option></select>
+      <span class="pill-count" id="countCk"></span>
+    </div>
+    <div style="overflow-x:auto;"><table class="data" id="tableCk"></table></div>
+  </section>
+
+  <!-- BM -->
+  <section id="view-bm" class="view">
+    <div class="bidang-head">
+      <div>
+        <h2>Bidang Bina Marga</h2>
+        <p class="desc">Long segment DAK, pelebaran, rehabilitasi &amp; pemeliharaan jalan — DPUPR Kabupaten Karanganyar TA 2026</p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="searchBm" placeholder="Cari nama paket, lokasi, atau penyedia jasa...">
+      <select id="filterBm"><option value="">Semua Status</option></select>
+      <span class="pill-count" id="countBm"></span>
+    </div>
+    <div style="overflow-x:auto;"><table class="data" id="tableBm"></table></div>
+  </section>
+
+</main>
+
+<footer>
+  Data bersifat terbuka (open data) untuk keperluan pendampingan pengawasan Tipidkor Polres Karanganyar bersama DPUPR Kabupaten Karanganyar.
+</footer>
+
+<!-- DETAIL / EDIT MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Detail Paket</h3>
+      <button id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<script>
+const SEED_DATA = {"sda": [{"no": 1, "nama": "Rehabilitasi Jaringan Irigasi D.I. Margoyoso", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Kebak, Kec. Jumantono", "pagu": 384000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 2, "nama": "Rehabilitasi Embung Jungke Kab. Karanganyar", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Jungke, Kec. Karanganyar", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 3, "nama": "Rehabilitasi Jaringan Irigasi D.I. Jetis II", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Mojoroto, Kec. Mojogedang", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 4, "nama": "Rehabilitasi Jaringan Irigasi D.I. Delingan Wetan Jetu", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Gedong, Kec. Karanganyar", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 5, "nama": "Rehabilitasi Jaringan Irigasi D.I. Kalongan", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Ngijo, Kec. Tasikmadu", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 6, "nama": "Rehabilitasi Jaringan Irigasi D.I. Kedungbang", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Ngadiluwih, Kec. Matesih", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 7, "nama": "Rehabilitasi Jaringan Irigasi D.I. Klodron", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Harjosari, Kec. Karangpandan", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 8, "nama": "Rehabilitasi Jaringan Irigasi D.I. Seklampok", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Sringin, Kec. Jumantono", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 9, "nama": "Rehabilitasi Jaringan Irigasi D.I. Toyo", "sumber": "Bantuan Provinsi (BanProv)", "lokasi": "Bangsri, Kec. Karangpandan", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}], "ck": [{"no": 1, "nama": "Peningkatan SPAM Dompyong Pringapus, Desa Gondangmanis, Kec Karangpandan, Kab. Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Gondangmanis, Kec. Karangpandan", "pagu": 100000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 2, "nama": "Peningkatan SPAM Dukuh Kebakdemang RW07, Desa Kemiri, Kebakkramat", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Kemiri, Kec. Kebakkramat", "pagu": 200000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 3, "nama": "Peningkatan SPAM Dukuh Musuk Desa Tohkuning Kec Karangpandan Kab Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Tohkuning, Kec. Karangpandan", "pagu": 105000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 4, "nama": "Peningkatan SPAM Dukuh Ngelo Desa Kemiri Kec Kebakkramat Kab Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Kemiri, Kec. Kebakkramat", "pagu": 200000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 5, "nama": "Peningkatan SPAM Dukuh Tohkuning, Desa Tohkuning, Kec Karangpandan, Kab. Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Tohkuning, Kec. Karangpandan", "pagu": 105000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 6, "nama": "Peningkatan SPAM Dusun Dalungan RW. 04, Desa Macanan, Kebakkramat, Kab. Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Macanan, Kec. Kebakkramat", "pagu": 200000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 7, "nama": "Peningkatan SPAM Dusun Grenjeng Rt.04/Rw.02 Desa Dayu Kec. Gondangrejo", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Dayu, Kec. Gondangrejo", "pagu": 100000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 8, "nama": "Peningkatan SPAM Dusun Nayan RT. 02 RW. 07, Desa Nangsri, Kebakkramat, Kab. Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Nangsri, Kec. Kebakkramat", "pagu": 200000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 9, "nama": "Peningkatan SPAM Dusun Pendoworejo RW10 Desa Tohkuning Kec Karangpandan", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Tohkuning, Kec. Karangpandan", "pagu": 100000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 10, "nama": "Peningkatan SPAM Dusun Pengin Tengah RW10, Desa Macanan, Kebakkramat, Kab.Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Macanan, Kec. Kebakkramat", "pagu": 100000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 11, "nama": "Peningkatan SPAM Dusun Wates Desa Karangsari Kec Jatiyoso Kab Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Karangsari, Kec. Jatiyoso", "pagu": 150000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 12, "nama": "Peningkatan SPAM Ngringin Desa Bangsri Kec Karangpandan", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Bangsri, Kec. Karangpandan", "pagu": 200000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 13, "nama": "Peningkatan SPAM RT01, RT02, RT03 Dukuh Waru, Desa Waru, Kebakkramat, Kab.Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Waru, Kec. Kebakkramat", "pagu": 100000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 14, "nama": "Pembangunan Sistem Pengelolaan Air Limbah Domestik Setempat", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Pendem & Sewurejo, Kec. Mojogedang", "pagu": 120000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 15, "nama": "Perluasan Sistem Pengelolaan Air Limbah Domestik Terpusat", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Kemiri & Macanan, Kec. Kebakkramat", "pagu": 220000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 16, "nama": "Pembangunan Talud Jalan dan Penataan Lahan di RT. 20 RW 10 Desa Tlobo Kec Jatiyoso", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Tlobo, Kec. Jatiyoso", "pagu": 100000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 17, "nama": "Pembangunan Gedung - Lantai Dua Kantor Unit Lakalantas Satlantas Polres Karanganyar dan Garasi Kendaraan Bermotor", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karanganyar", "pagu": 1190000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 18, "nama": "Pembangunan Musholla Kejaksaan Negeri Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karanganyar", "pagu": 710000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 19, "nama": "Pembangunan Ruang Pelayanan Kejaksaan Negeri Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karanganyar", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 20, "nama": "Rehabilitasi Gedung - Pemugaran Kantor PP Polri Cabang Karanganyar", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karanganyar", "pagu": 178000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 21, "nama": "Pembangunan Puskesmas Jaten 1 Tahap 2", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Desa Jaten, Kec. Jaten", "pagu": 800000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 22, "nama": "Operasi dan Pemeliharaan Drainase Perkotaan", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karanganyar", "pagu": 490050000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 23, "nama": "Pembangunan/Pengembangan SPAM/Sarpras Jaringan Perpipaan Dimoro RT.001 RW.010 Kelurahan Karanganyar", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Karanganyar, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 24, "nama": "Pembangunan Saluran Drainase Jalan Depoksari RW 1 Kec. Karanganyar", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Bolong, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 25, "nama": "Pembangunan Saluran Drainase Jalan Dompon RT 01 RW 08 Kec. Karanganyar", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Karanganyar, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 26, "nama": "Pembangunan Talud/Penahan Tebing/Pembentuk Badan Jalan Geneng RT 4 RW 12 Kelurahan Gayamdompo", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Gayamdompo, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 27, "nama": "Pembangunan Talud/Penahan Tebing/Pembentuk Badan Jalan Jrakah RT 03 RW 13 Kelurahan Delingan", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Delingan, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 28, "nama": "Rehabilitasi Jalan Aspal Dusun Tunggul Tani RT 01,02 RW 07 dan Dusun Banyak RW 02 Kel. Jantiharjo", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Jantiharjo, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 29, "nama": "Rehabilitasi Jalan Aspal Jalan Pelet RT 04 RW 06 Kel. Gedong", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Gedong, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 30, "nama": "Rehabilitasi Jalan Badran Asri RW 10 Kel. Cangakan", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Cangakan, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 31, "nama": "Rehabilitasi Jalan Dukuh Karangsari RT 1,2,3 RW 07 Kelurahan Tawangmangu", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Tawangmangu, Kec. Tawangmangu", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 32, "nama": "Rehabilitasi Jalan Manggis Rt3/Rw12 Blok 14, Lalung", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Lalung, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 33, "nama": "Rehabilitasi Jalan Karanganyar RT.3 RW.07", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 34, "nama": "Rehabilitasi Jalan Lingkungan Jungke RW. 02 Kelurahan Jungke", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Jungke, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 35, "nama": "Rehabilitasi Jalan Lingkungan Seneng", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Bolong, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 36, "nama": "Rehabilitasi Jalan Lingkungan Tegalasri Kelurahan Bejen", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Bejen, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 37, "nama": "Rehabilitasi Jalan Lingkungan Tolok - Jati Kelurahan Tegalgede", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Tegalgede, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 38, "nama": "Rehabilitasi Jalan Lingkungan Wonorejo RT.003 RW.017 Kelurahan Bejen", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Bejen, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 39, "nama": "Rehabilitasi Jalan Lobang RT RW 05 Gedong", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Gedong, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 40, "nama": "Rehabilitasi Jalan Pengaspalan (Sandsheet) Dompon RT 01 dan RT 02 RW 08, Kelurahan Karanganyar", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Karanganyar, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 41, "nama": "Rehabilitasi Jalan Pengaspalan Ngarjosari RW 01 dan RW 02 Kel. Popongan", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Popongan, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 42, "nama": "Rehabilitasi Jalan Tawangmangu RW 01", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kec. Tawangmangu", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 43, "nama": "Rehabilitasi Jalan Usaha Tani Barat Sururejo Kerten Kelurahan Jantiharjo", "sumber": "Bantuan Keuangan (Bankeu)", "lokasi": "Kel. Jantiharjo, Kec. Karanganyar", "pagu": 201000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}], "bm": [{"no": 1, "nama": "Penanganan Long Segment Ruas Jalan Bendungan - Jenggrik", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Mojogedang", "pagu": 5893000000, "hps": 4799688799, "penawaran": 4797613590, "penyedia": "CV. Karya Usaha Berdikari", "alamat": "Gumunggung RT.002/RW.002, Kel. Gilingan, Kec. Banjarsari, Surakarta", "progres": "Kontrak"}, {"no": 2, "nama": "Penanganan Long Segment Ruas Jalan Colomadu - Banyuanyar", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Colomadu", "pagu": 4913000000, "hps": 3901596508, "penawaran": 3901596508, "penyedia": "Pilar Jaya Persada, CV", "alamat": "Jl. Mataram IV No. 2, Kel. Banyuanyar, Kec. Banjarsari, Surakarta", "progres": "Kontrak"}, {"no": 3, "nama": "Penanganan Long Segment Ruas Jalan Jatipuro - Klerong", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Jatipuro", "pagu": 1813000000, "hps": 1681304790, "penawaran": 1681082790, "penyedia": "Zhafran Jaya Konstruksi", "alamat": "Kedungringin RT.08/RW.02, Waru, Kebakkramat, Karanganyar", "progres": "Kontrak"}, {"no": 4, "nama": "Penanganan Long Segment Ruas Jalan Jatiyoso - Beruk", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Jatiyoso", "pagu": 4423000000, "hps": 3649719265, "penawaran": 3649719265, "penyedia": "CV. Anugerah Lima Utama", "alamat": "", "progres": "Kontrak"}, {"no": 5, "nama": "Penanganan Long Segment Ruas Jalan Jumapolo - Jatipuro", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Jatipuro", "pagu": 9301000000, "hps": 8285838344, "penawaran": 8285838344, "penyedia": "CV. Putra Kalingga", "alamat": "Ngasinan RT.03/RW.12, Jebres, Surakarta", "progres": "Kontrak"}, {"no": 6, "nama": "Penanganan Long Segment Ruas Jalan Matesih - Plosorejo", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Matesih", "pagu": 4003000000, "hps": 3433682121, "penawaran": 3431462121, "penyedia": "Cipta Graha", "alamat": "Jl. Brigjend Sudiarto No. 183, RT.001/RW.005, Serengan, Joyotakan, Surakarta", "progres": "Kontrak"}, {"no": 7, "nama": "Penanganan Long Segment Ruas Jalan MGR. Sugiyopranoto", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Karanganyar/Karangpandan", "pagu": 7613000000, "hps": 5950737690, "penawaran": 5950737690, "penyedia": "CV. Mitra Karya Lima", "alamat": "Sumber RT.003/RW.013, Kel. Sumber, Kec. Banjarsari, Surakarta", "progres": "Kontrak"}, {"no": 8, "nama": "Penanganan Long Segment Ruas Jalan Sringin - Tunggulrejo", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Jumantono", "pagu": 2393000000, "hps": 1867174538, "penawaran": 1867174538, "penyedia": "CV. Mitra Karya Lima", "alamat": "Sumber RT.003/RW.013, Kel. Sumber, Kec. Banjarsari, Surakarta", "progres": "Kontrak"}, {"no": 9, "nama": "Penanganan Long Segment Ruas Jalan Tlobosempon - Matesih", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Jatiyoso/Matesih", "pagu": 3793000000, "hps": 2957857642, "penawaran": 2957857642, "penyedia": "CV. Mitra Karya Lima", "alamat": "Sumber RT.003/RW.013, Kel. Sumber, Kec. Banjarsari, Surakarta", "progres": "Kontrak"}, {"no": 10, "nama": "Penanganan Long Segment Ruas Jalan Tuban - Jambu", "sumber": "Dana Alokasi Khusus (DAK)", "lokasi": "Gondangrejo", "pagu": 4081000000, "hps": 3180029380, "penawaran": 3180029380, "penyedia": "CV. Redjo Pawiro", "alamat": "Jembangan RT.4/RW.3, Kaling, Tasikmadu, Karanganyar", "progres": "Kontrak"}, {"no": 11, "nama": "Pelebaran Jalan Jumapolo-Jumantono (Ruas 185)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Jumapolo/Jumantono", "pagu": 5337747300, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 12, "nama": "Rehabilitasi Jalan Matesih - Tegalgede (Ruas 141)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Matesih/Karanganyar", "pagu": 4935000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 13, "nama": "Pelebaran Jalan Gedong - Kebonagung (Ruas 202)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Tasikmadu", "pagu": 2660000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 14, "nama": "Pelebaran Jalan Kebak - Punthuk (Ruas 183)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Jumantono", "pagu": 2040000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 15, "nama": "Pembangunan Talud Dayu - Sangiran", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Gondangrejo", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 16, "nama": "Pembangunan Talud Jalan Gragalan - Blora", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karangpandan", "pagu": 300000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 17, "nama": "Pembangunan Talud Jalan Matesih - Girilayu", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Matesih", "pagu": 250000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 18, "nama": "Pembangunan Talud Jalan Ngargoyoso Jenawi", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Ngargoyoso/Jenawi", "pagu": 245000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 19, "nama": "Pemeliharaan berkala jalan Jenawi - Anggrasmanis (Ruas 110)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Jenawi", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 20, "nama": "Pemeliharaan Berkala Jalan Matesih - Tawangmangu (Ruas 126)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Matesih/Tawangmangu", "pagu": 4935000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 21, "nama": "Pemeliharaan Berkala Jalan Mipidan (Ruas 34)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Gondangrejo", "pagu": 600000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 22, "nama": "Pemeliharaan Berkala Jalan Ngargoyoso - Kadipekso (Ruas 115)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Ngargoyoso/Jenawi", "pagu": 510000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 23, "nama": "Pemeliharaan jalan Delingan - Gajahan (Ruas 317)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karanganyar", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 24, "nama": "Pemeliharaan jalan Pendem - Ngargoyoso (Ruas 71)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Mojogedang", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 25, "nama": "Pemeliharaan Berkala Jalan Baturan - Klodran (Ruas 13)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Colomadu", "pagu": 960000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 26, "nama": "Pengaspalan Jalan Bok Pitikan Kel. Lalung (Ruas 241)", "sumber": "Dana Alokasi Umum (DAU)", "lokasi": "Karanganyar", "pagu": 200000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 27, "nama": "Pelebaran Jalan Gembong - Blorong (Ruas 176)", "sumber": "Bantuan Provinsi (Banprov)", "lokasi": "Jumantono", "pagu": 5000000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 28, "nama": "Rekonstruksi Jalan Srandon - Puntukrejo (Ruas 88)", "sumber": "Bantuan Provinsi (Banprov)", "lokasi": "Karangpandan", "pagu": 6000000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 29, "nama": "Pembangunan Jembatan Pentuk - Candi", "sumber": "Belanja Barang untuk Diserahkan kepada Masyarakat", "lokasi": "Mojogedang", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 30, "nama": "Penggantian Jembatan Bulu-bulu Ruas Trengguli - Lempong", "sumber": "Belanja Barang untuk Diserahkan kepada Masyarakat", "lokasi": "Jenawi", "pagu": 400000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}, {"no": 31, "nama": "Pembangunan Jalan menuju Kebon 9 - 11 Gumeng", "sumber": "Belanja Barang untuk Diserahkan kepada Masyarakat", "lokasi": "Jenawi", "pagu": 1610000000, "hps": null, "penawaran": null, "penyedia": "", "alamat": "", "progres": "Perencanaan"}]};
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, collection, getDocs, doc, setDoc, updateDoc, writeBatch, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCtPl_FZj8MXr5BSeISZGw9jX7L1VHcMxw",
+  authDomain: "monitoringdpu.firebaseapp.com",
+  projectId: "monitoringdpu",
+  storageBucket: "monitoringdpu.firebasestorage.app",
+  messagingSenderId: "15447119409",
+  appId: "1:15447119409:web:d0222e1b0414d1356a6710"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ADMIN_PIN = "246810"; // PIN sederhana untuk edit data
+
+const BIDANG_META = {
+  sda: { collection: "sda_paket", label: "Sumber Daya Air", color: "#26497a" },
+  ck:  { collection: "ck_paket",  label: "Cipta Karya",     color: "#b8912f" },
+  bm:  { collection: "bm_paket",  label: "Bina Marga",      color: "#7c1d24" },
+};
+
+const STATUS_LIST = ["Perencanaan","Tender","Kontrak","Pelaksanaan","Selesai"];
+const STATUS_COLORS = { "Perencanaan":"#9aa1ab","Tender":"#c9a227","Kontrak":"#3a5f9c","Pelaksanaan":"#c9752e","Selesai":"#3d8a55" };
+
+let STATE = { sda: [], ck: [], bm: [] };
+let unlocked = false;
+
+function fmtRp(n){
+  if(n === null || n === undefined || n === "") return "";
+  return "Rp " + Number(n).toLocaleString("id-ID");
+}
+function badgeClass(status){
+  return "badge badge-" + (status||"Perencanaan").toLowerCase();
+}
+// Ambang batas Pengadaan Langsung untuk Pekerjaan Konstruksi: s.d. Rp400.000.000 (default, bisa dioverride manual)
+function metodePemilihan(pagu){
+  return (pagu||0) <= 400000000 ? "Pengadaan Langsung (PL)" : "Tender/Lelang";
+}
+function getMetode(r){
+  return r.metode || metodePemilihan(r.pagu);
+}
+function metodeBadgeClass(metodeStr){
+  return metodeStr === "Pengadaan Langsung (PL)" ? "badge badge-pl" : "badge badge-tender-metode";
+}
+
+// ---------- SEED IF EMPTY ----------
+async function ensureSeeded(bidangKey){
+  const colRef = collection(db, BIDANG_META[bidangKey].collection);
+  const snap = await getDocs(colRef);
+  if(snap.empty){
+    const batch = writeBatch(db);
+    SEED_DATA[bidangKey].forEach(rec => {
+      const id = "P" + String(rec.no).padStart(3,"0");
+      batch.set(doc(db, BIDANG_META[bidangKey].collection, id), rec);
+    });
+    await batch.commit();
+  }
+}
+
+// ---------- LIVE LISTEN ----------
+function listen(bidangKey){
+  const colRef = collection(db, BIDANG_META[bidangKey].collection);
+  onSnapshot(colRef, (snap) => {
+    const arr = [];
+    snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+    arr.sort((a,b) => (a.no||0) - (b.no||0));
+    STATE[bidangKey] = arr;
+    renderTable(bidangKey);
+    renderDashboard();
+  });
+}
+
+// ---------- INIT ----------
+async function init(){
+  for(const key of Object.keys(BIDANG_META)){
+    await ensureSeeded(key);
+    listen(key);
+  }
+  populateFilters();
+}
+init();
+
+function populateFilters(){
+  ["sda","ck","bm"].forEach(key=>{
+    const sel = document.getElementById("filter"+cap(key));
+    STATUS_LIST.forEach(s=>{
+      const o = document.createElement("option");
+      o.value = s; o.textContent = s;
+      sel.appendChild(o);
+    });
+  });
+}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// ---------- TABS ----------
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("view-"+btn.dataset.view).classList.add("active");
+  });
+});
+
+// ---------- TABLE RENDER ----------
+function renderTable(bidangKey){
+  const rows = STATE[bidangKey];
+  const searchEl = document.getElementById("search"+cap(bidangKey));
+  const filterEl = document.getElementById("filter"+cap(bidangKey));
+  const countEl = document.getElementById("count"+cap(bidangKey));
+  const tableEl = document.getElementById("table"+cap(bidangKey));
+
+  const q = (searchEl.value||"").toLowerCase();
+  const statusF = filterEl.value;
+
+  const filtered = rows.filter(r=>{
+    const hay = (r.nama+" "+r.lokasi+" "+r.penyedia+" "+(r.keterangan||"")).toLowerCase();
+    const matchQ = !q || hay.includes(q);
+    const matchS = !statusF || r.progres === statusF;
+    return matchQ && matchS;
+  });
+
+  countEl.textContent = filtered.length + " dari " + rows.length + " paket";
+
+  let html = `<thead><tr>
+    <th class="col-no">No</th><th class="col-nama">Nama Paket</th><th>Sumber Dana</th><th>Lokasi</th>
+    <th style="text-align:right">Pagu</th><th>Metode Pemilihan</th>
+    <th>Penyedia Jasa</th><th>Progres</th><th>Keterangan</th>
+  </tr></thead><tbody>`;
+
+  filtered.forEach(r=>{
+    html += `<tr data-bidang="${bidangKey}" data-id="${r.id}">
+      <td class="col-no">${r.no}</td>
+      <td class="col-nama">${escapeHtml(r.nama)}</td>
+      <td>${escapeHtml(r.sumber)}</td>
+      <td>${escapeHtml(r.lokasi)}</td>
+      <td class="col-num">${fmtRp(r.pagu)}</td>
+      <td><span class="${metodeBadgeClass(getMetode(r))}">${getMetode(r)}</span></td>
+      <td>${r.penyedia ? escapeHtml(r.penyedia) : '<span class="empty-note">Belum ada</span>'}</td>
+      <td><span class="${badgeClass(r.progres)}">${r.progres||"Perencanaan"}</span></td>
+      <td>${r.keterangan ? escapeHtml(r.keterangan) : '<span class="empty-note">—</span>'}</td>
+    </tr>`;
+  });
+  html += "</tbody>";
+  tableEl.innerHTML = html;
+
+  tableEl.querySelectorAll("tbody tr").forEach(tr=>{
+    tr.addEventListener("click", ()=> openDetail(tr.dataset.bidang, tr.dataset.id));
+  });
+}
+
+["Sda","Ck","Bm"].forEach(cap=>{
+  const key = cap.toLowerCase();
+  document.getElementById("search"+cap).addEventListener("input", ()=>renderTable(key));
+  document.getElementById("filter"+cap).addEventListener("change", ()=>renderTable(key));
+});
+
+function escapeHtml(s){
+  if(s===undefined||s===null) return "";
+  return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// ---------- DASHBOARD ----------
+function renderDashboard(){
+  const all = [...STATE.sda, ...STATE.bm, ...STATE.ck];
+  if(all.length === 0) return;
+
+  const totalPaket = all.length;
+
+  // ---- status donut chart (pure CSS conic-gradient) ----
+  const count = {};
+  STATUS_LIST.forEach(s=>count[s]=0);
+  all.forEach(r=>{ count[r.progres||"Perencanaan"] = (count[r.progres||"Perencanaan"]||0)+1; });
+
+  let acc = 0;
+  const gradientParts = STATUS_LIST.map(s=>{
+    const pct = (count[s]/totalPaket*100);
+    const start = acc;
+    acc += pct;
+    return `${STATUS_COLORS[s]} ${start}% ${acc}%`;
+  });
+  document.getElementById("statusDonut").style.background = `conic-gradient(${gradientParts.join(",")})`;
+  document.getElementById("donutCenter").innerHTML = `<span class="num">${totalPaket}</span><span class="lbl">Total Paket</span>`;
+
+  document.getElementById("statusLegend").innerHTML = STATUS_LIST.map(s=>{
+    const pct = (count[s]/totalPaket*100);
+    return `<li>
+      <span class="dot" style="background:${STATUS_COLORS[s]}"></span>
+      ${s}
+      <span class="cnt">${count[s]} paket</span>
+      <span class="pct">${pct.toFixed(1)}%</span>
+    </li>`;
+  }).join("");
+
+  // ---- per-bidang breakdown cards ----
+  const cardsHtml = ["sda","ck","bm"].map(k=>{
+    const rows = STATE[k];
+    const c = {};
+    STATUS_LIST.forEach(s=>c[s]=0);
+    rows.forEach(r=>{ c[r.progres||"Perencanaan"] = (c[r.progres||"Perencanaan"]||0)+1; });
+    const maxN = Math.max(1, ...STATUS_LIST.map(s=>c[s]));
+    const rowsHtml = STATUS_LIST.map(s=>{
+      const n = c[s];
+      const pct = (n/maxN*100);
+      return `<div class="status-row">
+        <span class="dot" style="background:${STATUS_COLORS[s]}"></span>
+        <span class="name">${s}</span>
+        <span class="track"><span class="fill" style="width:${pct}%;background:${STATUS_COLORS[s]}"></span></span>
+        <span class="n">${n}</span>
+      </div>`;
+    }).join("");
+    return `<div class="bidang-card">
+      <div class="bidang-card-head"><h3>${BIDANG_META[k].label}</h3><span class="count">${rows.length} paket</span></div>
+      <p class="subline">Total pagu ${fmtRp(rows.reduce((s,r)=>s+(r.pagu||0),0))}</p>
+      ${rowsHtml}
+    </div>`;
+  }).join("");
+  document.getElementById("bidangCards").innerHTML = cardsHtml;
+}
+
+// ---------- DETAIL / EDIT MODAL ----------
+const overlay = document.getElementById("overlay");
+const modalTitle = document.getElementById("modalTitle");
+const modalBody = document.getElementById("modalBody");
+const modalFoot = document.getElementById("modalFoot");
+
+function openDetail(bidangKey, id){
+  const rec = STATE[bidangKey].find(r=>r.id===id);
+  if(!rec) return;
+  modalTitle.textContent = "Paket #" + rec.no + " — " + BIDANG_META[bidangKey].label;
+  renderViewMode(bidangKey, rec);
+  overlay.classList.add("active");
+}
+document.getElementById("modalClose").addEventListener("click", ()=> overlay.classList.remove("active"));
+overlay.addEventListener("click", (e)=>{ if(e.target===overlay) overlay.classList.remove("active"); });
+
+function renderViewMode(bidangKey, rec){
+  modalBody.innerHTML = `
+    <div class="field"><label>Nama Paket</label><div class="static">${escapeHtml(rec.nama)}</div></div>
+    <div class="field-row">
+      <div class="field"><label>Sumber Dana</label><div class="static">${escapeHtml(rec.sumber)}</div></div>
+      <div class="field"><label>Lokasi</label><div class="static">${escapeHtml(rec.lokasi)}</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Pagu</label><div class="static">${fmtRp(rec.pagu)}</div></div>
+      <div class="field"><label>Metode Pemilihan</label><div class="static"><span class="${metodeBadgeClass(getMetode(rec))}">${getMetode(rec)}</span></div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Progres</label><div class="static"><span class="${badgeClass(rec.progres)}">${rec.progres||"Perencanaan"}</span></div></div>
+    </div>
+    <div class="field"><label>Nama Penyedia Jasa</label><div class="static">${rec.penyedia?escapeHtml(rec.penyedia):"Belum ada data"}</div></div>
+    <div class="field"><label>Alamat Penyedia</label><div class="static">${rec.alamat?escapeHtml(rec.alamat):"Belum ada data"}</div></div>
+    <div class="field"><label>Keterangan</label><div class="static">${rec.keterangan?escapeHtml(rec.keterangan):"—"}</div></div>
+  `;
+  modalFoot.innerHTML = `<button class="btn btn-ghost" id="btnClose">Tutup</button><button class="btn btn-primary" id="btnEdit">Edit Data</button>`;
+  document.getElementById("btnClose").addEventListener("click", ()=> overlay.classList.remove("active"));
+  document.getElementById("btnEdit").addEventListener("click", ()=> requestPinThenEdit(bidangKey, rec));
+}
+
+function requestPinThenEdit(bidangKey, rec){
+  if(unlocked){ renderEditMode(bidangKey, rec); return; }
+  modalBody.innerHTML = `
+    <div class="field">
+      <label>Masukkan PIN Admin</label>
+      <input type="password" id="pinInput" placeholder="PIN" maxlength="10" autofocus>
+      <p class="pin-note" id="pinError" style="color:var(--danger);"></p>
+    </div>
+  `;
+  modalFoot.innerHTML = `<button class="btn btn-ghost" id="btnCancelPin">Batal</button><button class="btn btn-primary" id="btnSubmitPin">Masuk</button>`;
+  document.getElementById("btnCancelPin").addEventListener("click", ()=> renderViewMode(bidangKey, rec));
+  document.getElementById("btnSubmitPin").addEventListener("click", ()=>{
+    const val = document.getElementById("pinInput").value;
+    if(val === ADMIN_PIN){
+      unlocked = true;
+      renderEditMode(bidangKey, rec);
+    } else {
+      document.getElementById("pinError").textContent = "PIN salah. Silakan coba lagi.";
+    }
+  });
+  document.getElementById("pinInput").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") document.getElementById("btnSubmitPin").click();
+  });
+}
+
+function renderEditMode(bidangKey, rec){
+  const metodeSaatIni = getMetode(rec);
+  modalBody.innerHTML = `
+    <div class="field"><label>Nama Paket</label><div class="static">${escapeHtml(rec.nama)}</div></div>
+    <div class="field">
+      <label>Metode Pemilihan</label>
+      <select id="editMetode">
+        <option value="Pengadaan Langsung (PL)" ${metodeSaatIni==="Pengadaan Langsung (PL)"?"selected":""}>Pengadaan Langsung (PL)</option>
+        <option value="Tender/Lelang" ${metodeSaatIni==="Tender/Lelang"?"selected":""}>Tender/Lelang</option>
+      </select>
+      <p class="pin-note">Default otomatis: pagu ≤ Rp400 juta = PL, di atas itu = Tender/Lelang. Bisa diubah manual bila ada pengecualian.</p>
+    </div>
+    <div class="field"><label>Nama Penyedia Jasa</label><input type="text" id="editPenyedia" value="${escapeHtml(rec.penyedia||'')}"></div>
+    <div class="field"><label>Alamat Penyedia</label><input type="text" id="editAlamat" value="${escapeHtml(rec.alamat||'')}"></div>
+    <div class="field">
+      <label>Progres</label>
+      <select id="editProgres">
+        ${STATUS_LIST.map(s=>`<option value="${s}" ${s===rec.progres?"selected":""}>${s}</option>`).join("")}
+      </select>
+    </div>
+    <div class="field"><label>Keterangan</label><input type="text" id="editKeterangan" value="${escapeHtml(rec.keterangan||'')}" placeholder="Catatan tambahan (opsional)"></div>
+  `;
+  modalFoot.innerHTML = `<button class="btn btn-ghost" id="btnCancelEdit">Batal</button><button class="btn btn-primary" id="btnSave">Simpan Perubahan</button>`;
+  document.getElementById("btnCancelEdit").addEventListener("click", ()=> renderViewMode(bidangKey, rec));
+  document.getElementById("btnSave").addEventListener("click", async ()=>{
+    const updates = {
+      metode: document.getElementById("editMetode").value,
+      penyedia: document.getElementById("editPenyedia").value.trim(),
+      alamat: document.getElementById("editAlamat").value.trim(),
+      progres: document.getElementById("editProgres").value,
+      keterangan: document.getElementById("editKeterangan").value.trim(),
+    };
+    // auto-sync alamat across packages with same penyedia name
+    await updateDoc(doc(db, BIDANG_META[bidangKey].collection, rec.id), updates);
+    if(updates.penyedia && updates.alamat){
+      await syncAlamatAcross(updates.penyedia, updates.alamat, bidangKey, rec.id);
+    }
+    overlay.classList.remove("active");
+  });
+}
+
+async function syncAlamatAcross(penyediaName, alamat, currentBidang, currentId){
+  for(const key of Object.keys(BIDANG_META)){
+    const matches = STATE[key].filter(r => r.penyedia === penyediaName && !(key===currentBidang && r.id===currentId) && (!r.alamat || r.alamat !== alamat));
+    for(const m of matches){
+      await updateDoc(doc(db, BIDANG_META[key].collection, m.id), { alamat });
+    }
+  }
+}
+</script>
+</body>
+</html>
