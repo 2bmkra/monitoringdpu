@@ -6,6 +6,7 @@
 <title>Monitoring Pendampingan Tipidkor — Polres Karanganyar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --navy:#152238;
@@ -163,6 +164,8 @@ main{max-width:1280px;margin:0 auto;padding:28px 24px 60px;}
 }
 .bidang-head h2{font-size:21px;margin:0 0 4px;color:var(--navy);}
 .bidang-head .desc{font-size:13px;color:var(--ink-soft);margin:0;}
+.excel-actions{display:flex;gap:8px;flex-shrink:0;}
+.btn-sm{padding:7px 13px;font-size:12.5px;}
 
 .toolbar{
   display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;
@@ -268,7 +271,7 @@ footer{
     <div class="kop-text">
       <p class="eyebrow">Dinas PUPR &amp; Kepolisian Resort Karanganyar · Unit Tipidkor</p>
       <h1>Monitoring Pendampingan Tipidkor Polres Karanganyar</h1>
-      <p class="sub">Data kegiatan fisik kontraktual — Bidang Sumber Daya Air, Cipta Karya, dan Bina Marga · Tahun Anggaran 2026</p>
+      <p class="sub">Data terbuka kegiatan fisik kontraktual — Bidang Sumber Daya Air, Cipta Karya, dan Bina Marga · Tahun Anggaran 2026</p>
     </div>
   </div>
 </header>
@@ -305,6 +308,11 @@ footer{
         <h2>Bidang Sumber Daya Air</h2>
         <p class="desc">Rehabilitasi jaringan irigasi &amp; embung — DPUPR Kabupaten Karanganyar TA 2026</p>
       </div>
+      <div class="excel-actions">
+        <button class="btn btn-ghost btn-sm" id="btnDownloadSda">⬇ Unduh Excel</button>
+        <button class="btn btn-ghost btn-sm" id="btnUploadSda">⬆ Upload Excel</button>
+        <input type="file" id="fileSda" accept=".xlsx,.xls" style="display:none;">
+      </div>
     </div>
     <div class="toolbar">
       <input type="text" id="searchSda" placeholder="Cari nama paket, lokasi, atau penyedia jasa...">
@@ -321,6 +329,11 @@ footer{
         <h2>Bidang Cipta Karya</h2>
         <p class="desc">SPAM, sanitasi, gedung, drainase &amp; rehabilitasi jalan lingkungan — DPUPR Kabupaten Karanganyar TA 2026</p>
       </div>
+      <div class="excel-actions">
+        <button class="btn btn-ghost btn-sm" id="btnDownloadCk">⬇ Unduh Excel</button>
+        <button class="btn btn-ghost btn-sm" id="btnUploadCk">⬆ Upload Excel</button>
+        <input type="file" id="fileCk" accept=".xlsx,.xls" style="display:none;">
+      </div>
     </div>
     <div class="toolbar">
       <input type="text" id="searchCk" placeholder="Cari nama paket, lokasi, atau penyedia jasa...">
@@ -336,6 +349,11 @@ footer{
       <div>
         <h2>Bidang Bina Marga</h2>
         <p class="desc">Long segment DAK, pelebaran, rehabilitasi &amp; pemeliharaan jalan — DPUPR Kabupaten Karanganyar TA 2026</p>
+      </div>
+      <div class="excel-actions">
+        <button class="btn btn-ghost btn-sm" id="btnDownloadBm">⬇ Unduh Excel</button>
+        <button class="btn btn-ghost btn-sm" id="btnUploadBm">⬆ Upload Excel</button>
+        <input type="file" id="fileBm" accept=".xlsx,.xls" style="display:none;">
       </div>
     </div>
     <div class="toolbar">
@@ -385,7 +403,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const ADMIN_PIN = "6969"; //
+const ADMIN_PIN = "246810"; // PIN sederhana untuk edit data
 
 const BIDANG_META = {
   sda: { collection: "sda_paket", label: "Sumber Daya Air", color: "#26497a" },
@@ -705,6 +723,147 @@ async function syncAlamatAcross(penyediaName, alamat, currentBidang, currentId){
     }
   }
 }
+
+// ---------- EXCEL DOWNLOAD ----------
+const EXCEL_HEADERS = ["No","Nama Paket","Sumber Dana","Lokasi","Pagu","Metode Pemilihan","Penyedia Jasa","Alamat Penyedia","Progres","Keterangan"];
+
+function downloadExcel(bidangKey){
+  if(typeof XLSX === "undefined"){
+    alert("Gagal memuat library Excel (koneksi internet bermasalah). Coba muat ulang halaman.");
+    return;
+  }
+  const rows = STATE[bidangKey];
+  const data = rows.map(r => ({
+    "No": r.no,
+    "Nama Paket": r.nama,
+    "Sumber Dana": r.sumber,
+    "Lokasi": r.lokasi,
+    "Pagu": r.pagu || 0,
+    "Metode Pemilihan": getMetode(r),
+    "Penyedia Jasa": r.penyedia || "",
+    "Alamat Penyedia": r.alamat || "",
+    "Progres": r.progres || "Perencanaan",
+    "Keterangan": r.keterangan || "",
+  }));
+  const ws = XLSX.utils.json_to_sheet(data, { header: EXCEL_HEADERS });
+  ws["!cols"] = [{wch:5},{wch:45},{wch:22},{wch:22},{wch:16},{wch:20},{wch:26},{wch:36},{wch:14},{wch:30}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, BIDANG_META[bidangKey].label.substring(0,31));
+  const today = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `Monitoring_${bidangKey.toUpperCase()}_${today}.xlsx`);
+}
+
+// ---------- EXCEL UPLOAD ----------
+function parseRupiahLike(v){
+  if(v === undefined || v === null || v === "") return 0;
+  if(typeof v === "number") return Math.round(v);
+  const cleaned = String(v).replace(/[^\d]/g, "");
+  return cleaned ? parseInt(cleaned, 10) : 0;
+}
+function normalizeMetode(v){
+  const s = String(v||"").toLowerCase();
+  if(s.includes("pl") || s.includes("langsung")) return "Pengadaan Langsung (PL)";
+  if(s.includes("tender") || s.includes("lelang")) return "Tender/Lelang";
+  return ""; // biarkan default otomatis yang menentukan
+}
+function normalizeProgres(v){
+  const found = STATUS_LIST.find(s => s.toLowerCase() === String(v||"").trim().toLowerCase());
+  return found || "Perencanaan";
+}
+
+async function processExcelUpload(bidangKey, file){
+  if(typeof XLSX === "undefined"){
+    alert("Gagal memuat library Excel (koneksi internet bermasalah). Coba muat ulang halaman.");
+    return;
+  }
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { defval: "" });
+
+  if(rows.length === 0){
+    alert("File Excel kosong atau format tidak terbaca.");
+    return;
+  }
+
+  const batch = writeBatch(db);
+  let count = 0;
+  rows.forEach(row=>{
+    const no = parseInt(row["No"], 10);
+    if(!no || isNaN(no)) return;
+    const id = "P" + String(no).padStart(3,"0");
+    const metode = normalizeMetode(row["Metode Pemilihan"]);
+    const payload = {
+      no: no,
+      nama: String(row["Nama Paket"]||"").trim(),
+      sumber: String(row["Sumber Dana"]||"").trim(),
+      lokasi: String(row["Lokasi"]||"").trim(),
+      pagu: parseRupiahLike(row["Pagu"]),
+      penyedia: String(row["Penyedia Jasa"]||"").trim(),
+      alamat: String(row["Alamat Penyedia"]||"").trim(),
+      progres: normalizeProgres(row["Progres"]),
+      keterangan: String(row["Keterangan"]||"").trim(),
+    };
+    if(metode) payload.metode = metode;
+    batch.set(doc(db, BIDANG_META[bidangKey].collection, id), payload, { merge: true });
+    count++;
+  });
+
+  if(count === 0){
+    alert("Tidak ada baris valid ditemukan (kolom \"No\" wajib diisi angka).");
+    return;
+  }
+  await batch.commit();
+  alert(`Berhasil memperbarui ${count} paket dari file Excel.`);
+}
+
+// ---------- GENERIC PIN GATE (untuk upload Excel) ----------
+function requestPinGeneric(onSuccess){
+  if(unlocked){ onSuccess(); return; }
+  modalTitle.textContent = "Verifikasi Admin";
+  modalBody.innerHTML = `
+    <div class="field">
+      <label>Masukkan PIN Admin</label>
+      <input type="password" id="pinInputGeneric" placeholder="PIN" maxlength="10" autofocus>
+      <p class="pin-note" id="pinErrorGeneric" style="color:var(--danger);"></p>
+    </div>
+  `;
+  modalFoot.innerHTML = `<button class="btn btn-ghost" id="btnCancelPinG">Batal</button><button class="btn btn-primary" id="btnSubmitPinG">Masuk</button>`;
+  overlay.classList.add("active");
+  document.getElementById("btnCancelPinG").addEventListener("click", ()=> overlay.classList.remove("active"));
+  document.getElementById("btnSubmitPinG").addEventListener("click", ()=>{
+    const val = document.getElementById("pinInputGeneric").value;
+    if(val === ADMIN_PIN){
+      unlocked = true;
+      overlay.classList.remove("active");
+      onSuccess();
+    } else {
+      document.getElementById("pinErrorGeneric").textContent = "PIN salah. Silakan coba lagi.";
+    }
+  });
+  document.getElementById("pinInputGeneric").addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") document.getElementById("btnSubmitPinG").click();
+  });
+}
+
+// ---------- WIRE UP EXCEL BUTTONS ----------
+["sda","ck","bm"].forEach(key=>{
+  const cap = key.charAt(0).toUpperCase()+key.slice(1);
+  document.getElementById("btnDownload"+cap).addEventListener("click", ()=> downloadExcel(key));
+  document.getElementById("btnUpload"+cap).addEventListener("click", ()=>{
+    requestPinGeneric(()=> document.getElementById("file"+cap).click());
+  });
+  document.getElementById("file"+cap).addEventListener("change", async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    try{
+      await processExcelUpload(key, file);
+    }catch(err){
+      alert("Gagal memproses file: " + err.message);
+    }
+    e.target.value = "";
+  });
+});
 </script>
 </body>
 </html>
